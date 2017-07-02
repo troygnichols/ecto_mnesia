@@ -372,6 +372,12 @@ defmodule EctoMnesia.AdapterTest do
       result = TestRepo.all from so in SellOffer, limit: 1
       assert 1 == length(result)
     end
+
+    test "supports expressions" do
+      lim = 2
+      result = TestRepo.all from so in SellOffer, limit: ^lim
+      assert 2 == length(result)
+    end
   end
 
   test "stream is not supported" do
@@ -443,6 +449,21 @@ defmodule EctoMnesia.AdapterTest do
           order_by: [desc: so.loan_id]
 
       assert Enum.map(result, & &1.loan_id) == ["world", "hello", "hello"]
+    end
+
+    test "supports raw field name", %{loan1: loan1, loan2: loan2, loan3: loan3} do
+      result = [res1, res2, res3] =
+        TestRepo.all from so in SellOffer,
+          order_by: [desc: :age]
+      [21, 15, 11] = Enum.map(result, & &1.age)
+    end
+
+    test "supports expressions", %{loan1: loan1, loan2: loan2, loan3: loan3} do
+      field = :age
+      result = [res1, res2, res3] =
+        TestRepo.all from so in SellOffer,
+        order_by: [desc: ^field]
+      [21, 15, 11] = Enum.map(result, & &1.age)
     end
   end
 end
